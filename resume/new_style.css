@@ -85,3 +85,23 @@ hr {
 .objective .objective-details {
     margin-left: 1em;
 }
+
+/* About Me */ 
+.about-me p h2 { 
+    /* margin-left: 15px; */
+    margin: auto;
+}
+
+/* Game */
+.about-me .statement { 
+    margin: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    display: inline-block;
+    cursor: pointer;
+}
+
+/* Selected */
+.about-me .selected { 
+    background-color: #aaffaa;
+}
