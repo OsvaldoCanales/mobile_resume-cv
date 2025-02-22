@@ -12,8 +12,7 @@ const server = http.createServer((req, res) => {
 
     const parsedUrl = url.parse(req.url, true);
     const pathName = parsedUrl.pathname;
-
-    console.log(`Request for : ${pathName}`);
+    const query = parsedUrl.query;
 
     if (req.method === 'OPTIONS') { 
         res.writeHead(204);
@@ -23,16 +22,27 @@ const server = http.createServer((req, res) => {
 
     /// Handle GET Request: Fetch To-Do List
     if (pathName === "/api/todos" && req.method === 'GET') { 
-        const name = parsedUrl.query.name || 'Guest';   
-        write(res, todos);
+        let filteredTodos = [...todos];
+
+        if (query.completed) { 
+            const isCompleted = query.completed === 'true';
+            filteredTodos = filteredTodos.filter(todo => todo.completed === isCompleted); // Only accepts completed!
+        }
+
+        if (filteredTodos.length === 0) { 
+            res.writeHead(404, {'Content-Type': 'application/json'});
+            res.end(JSON.stringify({error: 'No matching todos found.'}));
+            return;
+        }
+        res.writeHead(200, {'Content-Type': 'application/json'});
+        res.end(JSON.stringify({todos}));
     }
     /// Handle POST Request: Add New To-Do
     else if (pathName === "/api/todos" && req.method === 'POST') {
 
         let body = '';
         req.on('data', chunk => { 
-            console.log("Recieved Chunk: ", chunk.toString());
-            body += chunk;
+            body += chunk.toString();
         });
 
         req.on('end', () => { 
@@ -55,11 +65,6 @@ const server = http.createServer((req, res) => {
         res.end("404 - Not Found");
     }
 });
-
-function write(res, response) { 
-    res.writeHead(200, {'Content-Type': 'application/json'});
-    res.end(JSON.stringify(response));
-}
 
 // Start Server 
 const PORT = 3000; 

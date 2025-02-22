@@ -3,21 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <title>To-Do List</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Simple To-Do List</h1>
+    <div class="container">
+        <h1>Simple To-Do List</h1>
 
-    <input type="text" id="userInput" placeholder="Enter a task">
-    <button onclick="postTodo()">Add To-Do</button>
+        <div class="input-selection">
+            <input type="text" id="userInput" placeholder="Enter a task">
+            <button onclick="postTodo()">Add To-Do</button>
+        </div>
 
-    <h2>Your To-Dos:</h2>
-    <ul id="todos"></ul>
+        <h2>View Todos:</h2>
+        <div class="filter-selection">
+            <!-- <h2>View Todos:</h2> -->
+            <button onclick="fetchTodos()"> All Todos</button>
+            <button onclick="fetchTodos('completed')"> Completed</button>
+            <button onclick="fetchTodos('incomplete')"> Incomplete</button>
+        </div>
 
+        <h3> Your Todos:</h3>
+        <ul id="todos"></ul>
+    </div>
+    
     <script src="requests.js"></script>
 
-    <script>
-        // Fetch the to-dos on page load
-        fetchTodos();
-    </script>
 </body>
 </html>

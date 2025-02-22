@@ -1,0 +1,41 @@
+
+body { 
+    font-family:'Segoe UI';
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+.container { 
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+}
+
+h1, h2, h3 { 
+    text-align: center;
+    color: #333;
+}
+
+/*Input Selection */
+.input-selection { 
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Filter Selection */ 
+.filter-selection { 
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#todos {
+    list-style-type: none;
+    padding: 0;
+}
+
+#todos li { 
+    background-color: #f9f9f9;
+}
