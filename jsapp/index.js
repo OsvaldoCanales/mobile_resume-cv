@@ -59,6 +59,36 @@ const server = http.createServer((req, res) => {
             res.end(JSON.stringify({ message: 'Todo added.', todo: newTodo }));
         });
     }
+    /// Handle PUT Request: Update To-Do
+    else if (pathName = "/api/todos" && req.method === 'PUT') { 
+        const id = praseInt(pathName.split('/'[3]));
+
+        let body = '';
+        req.on('data', chunk =>  { 
+            body += chunk.toString();
+        });
+
+        req.on('end', () => { 
+                const data = JSON.parse(body);
+                const todo = todos.find(t => t.id === id);
+
+                if (!todo) { 
+                    res.writeHead(404, {'Content-Type': 'application.json'});
+                    res.end(JSON.stringify({error: 'Todo not found'}));
+                    return;
+                }
+
+                // Updates fields
+                if (data.task !== undefined) { 
+                    todo.task = data.task; 
+                }
+                if (data.completed !== undefined) { 
+                    todo.completed = data.completed
+                }
+                res.writeHead(200, {'Content-Type': 'application/json'});
+                res.end(JSON.stringify("message: Todo updated"));
+        });
+    }
     /// User went to an unknown route 
     else { 
         res.writeHead(404, {'Content-Type': 'text/plain'});
