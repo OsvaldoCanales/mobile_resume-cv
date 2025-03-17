@@ -63,6 +63,9 @@ function fetchTodos(filter='') {
 }
 
 function postTodo() { 
+
+    const username = document.getElementById("admin-username").value;
+    const password = document.getElementById("admin-password").value;
     let userInput = document.getElementById("userInput").value; 
     let todoHeader = document.getElementById("todos-header");
     let url = `http://localhost:3000/api/todos`;
@@ -74,7 +77,8 @@ function postTodo() {
     fetch(url, {
         method: 'POST', 
         headers: { 
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': 'Basic ' + btoa(`${username}:${password}`)
         },
         body: JSON.stringify({task: userInput})
     })
@@ -88,6 +92,9 @@ function postTodo() {
 }
 
 function updateTodo(id, taskSpan) { 
+
+    const username = document.getElementById("admin-username").value;
+    const password = document.getElementById("admin-password").value;
     const currentText = taskSpan.textContent;
 
     const inputField = document.createElement("input");
@@ -104,7 +111,8 @@ function updateTodo(id, taskSpan) {
         if (updatedTask) { 
             fetch(url, { // Send PUT Request
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json', 
+                    'Authorization': 'Basic ' + btoa(`${username}:${password}`)},
                 body: JSON.stringify( { task: updatedTask})
             })
             .then(response => response.json())
@@ -127,11 +135,14 @@ function updateTodo(id, taskSpan) {
 }
 
 function deleteTodo(id, listItem) { 
+    const username = document.getElementById("admin-username").value;
+    const password = document.getElementById("admin-password").value;
     if (confirm("Are you sure you want to delete this task?")) { // prompt confirmation to user
         let url = `http://localhost:3000/api/todos/${id}`;
         // let url = `https://ocanales.duckdns.org/api/todos/${id}`;
         fetch(url, { 
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: {'Authorization': 'Basic ' + btoa(`${username}:${password}`)}
         })
         .then(response => response.json())
         .then(data => { 
@@ -220,9 +231,12 @@ function fetchUsers() {
           deleteBtn.onclick = () => deleteUser(user.username, adminUser, adminPass);
           actionsCell.appendChild(deleteBtn);
   
-          // (Optional) Edit button for changing role
-          // ...
-  
+          // Edit button for changing role
+          const updateBtn = document.createElement('button');
+          updateBtn.textContent = 'Update';
+          updateBtn.onclick = () => updateUser(user.username, adminUser, adminPass);
+          actionsCell.appendChild(updateBtn);
+          
           row.appendChild(actionsCell);
           tableBody.appendChild(row);
         });
@@ -231,6 +245,32 @@ function fetchUsers() {
         console.error('Error:', err);
         alert('Failed to fetch users. Are you an admin?');
       });
+  }
+
+  function updateUser(username, adminUser, adminPass ) { 
+
+    fetch(`http://localhost:3000/api/users/${username}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': 'Basic ' + btoa(`${adminUser}:${adminPass}`)
+        }
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Failed to update user: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          alert(data.message);
+          // Refresh the user list
+          fetchUsers();
+        })
+        .catch(err => {
+          console.error('Error:', err);
+          alert('Error updating user.');
+        });
+
   }
   
   function deleteUser(username, adminUser, adminPass) {

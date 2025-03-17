@@ -246,7 +246,6 @@ function authenticate(req, res) {
 
     // Recreate hashed version
     const candidateHash = hash(plainPassword + username);
-    console.log(`Hashed value for admin/secret is: ${candidateHash}`);
 
     // Find user
     const user = passwordDB.users.find( (u) => 
