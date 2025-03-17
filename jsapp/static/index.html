@@ -24,6 +24,41 @@
 
         <h3 id="todos-header"></h3>
         <ul id="todos"></ul>
+
+        <div id="admin-login">
+            <h2>Credentials</h2>
+            <input type="text" id="admin-username" placeholder="Username" />
+            <input type="password" id="admin-password" placeholder="Password" />
+          </div>
+          
+          <div id="create-user">
+            <h2>Create New User</h2>
+            <p> Select between 'Author' or 'Admin' role for new user. You must have the admin credentials entered first!</p>
+            <input type="text" id="new-username" placeholder="New Username" />
+            <input type="password" id="new-password" placeholder="New Password" />
+            <select id="new-role">
+              <option value="author">Author</option>
+              <option value="admin">Admin</option>
+            </select>
+            <button onclick="createUser()">Create User</button>
+          </div>
+          <div id="admin-section">
+            <h2>Admin Section</h2>
+            <button onclick="fetchUsers()">View Users</button>
+            <table id="users-table" border="1" style="margin-top: 1em;">
+              <thead>
+                <tr>
+                  <th>Username</th>
+                  <th>Role</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Filled dynamically -->
+              </tbody>
+            </table>
+          </div>
+          
     </div>
     
     <script src="requests.js"></script>
