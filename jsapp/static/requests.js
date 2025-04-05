@@ -5,8 +5,8 @@
 function fetchTodos(filter='') { 
     let todoHeader = document.getElementById("todos-header");
 
-    let url = `http://localhost:3000/api/todos`;
-    // let url = `https://ocanales.duckdns.org/api/todos`;
+    // let url = `http://localhost:3000/api/todos`;
+    let url = `https://ocanales.duckdns.org/api/todos`;
 
     if (filter === 'completed') { 
         todoHeader.innerHTML = 'Completed Todos: ';
@@ -63,13 +63,12 @@ function fetchTodos(filter='') {
 }
 
 function postTodo() { 
-
     const username = document.getElementById("admin-username").value;
     const password = document.getElementById("admin-password").value;
     let userInput = document.getElementById("userInput").value; 
     let todoHeader = document.getElementById("todos-header");
-    let url = `http://localhost:3000/api/todos`;
-    // let url = `https://ocanales.duckdns.org/api/todos`;
+    // let url = `http://localhost:3000/api/todos`;
+    let url = `https://ocanales.duckdns.org/api/todos`;
 
     if (!userInput.trim()) { 
         alert(" Error 404: Please enter a task.");
@@ -105,8 +104,8 @@ function updateTodo(id, taskSpan) {
     saveButton.textContent = "Save";
     saveButton.addEventListener("click", () => { 
     const updatedTask = inputField.value.trim();
-    let url = `http://localhost:3000/api/todos/${id}`;
-    // let url = `https://ocanales.duckdns.org/api/todos/${id}`;
+    // let url = `http://localhost:3000/api/todos/${id}`;
+    let url = `https://ocanales.duckdns.org/api/todos/${id}`;
 
         if (updatedTask) { 
             fetch(url, { // Send PUT Request
@@ -138,8 +137,8 @@ function deleteTodo(id, listItem) {
     const username = document.getElementById("admin-username").value;
     const password = document.getElementById("admin-password").value;
     if (confirm("Are you sure you want to delete this task?")) { // prompt confirmation to user
-        let url = `http://localhost:3000/api/todos/${id}`;
-        // let url = `https://ocanales.duckdns.org/api/todos/${id}`;
+        // let url = `http://localhost:3000/api/todos/${id}`;
+        let url = `https://ocanales.duckdns.org/api/todos/${id}`;
         fetch(url, { 
             method: 'DELETE',
             headers: {'Authorization': 'Basic ' + btoa(`${username}:${password}`)}
@@ -162,7 +161,9 @@ function createUser() {
     const newPassword = document.getElementById("new-password").value;
     const newRole = document.getElementById("new-role").value;
   
-    const url = `http://localhost:3000/api/users`;
+    // const url = `http://localhost:3000/api/users`;
+    let url = `https://ocanales.duckdns.org/api/users`;
+
   
     fetch(url, {
       method: 'POST',
@@ -191,8 +192,9 @@ function createUser() {
 function fetchUsers() {
     const adminUser = document.getElementById('admin-username').value;
     const adminPass = document.getElementById('admin-password').value;
+    let url = `https://ocanales.duckdns.org/api/users`;
   
-    fetch('http://localhost:3000/api/users', {
+    fetch(url, {
       method: 'GET',
       headers: {
         'Authorization': 'Basic ' + btoa(`${adminUser}:${adminPass}`)
@@ -230,13 +232,17 @@ function fetchUsers() {
           deleteBtn.textContent = 'Delete';
           deleteBtn.onclick = () => deleteUser(user.username, adminUser, adminPass);
           actionsCell.appendChild(deleteBtn);
-  
-          // Edit button for changing role
-          const updateBtn = document.createElement('button');
-          updateBtn.textContent = 'Update';
-          updateBtn.onclick = () => updateUser(user.username, adminUser, adminPass);
-          actionsCell.appendChild(updateBtn);
-          
+
+              // Change Role button
+          const changeRoleBtn = document.createElement('button');
+          changeRoleBtn.textContent = 'Change Role';
+          changeRoleBtn.onclick = () => {
+            const newRole = prompt(`Enter new role for ${user.username} (current: ${user.role}):`);
+            if (newRole && newRole !== user.role) {
+              updateUserRole(user.username, newRole, adminUser, adminPass);
+            }
+          };
+          actionsCell.appendChild(changeRoleBtn);
           row.appendChild(actionsCell);
           tableBody.appendChild(row);
         });
@@ -247,38 +253,42 @@ function fetchUsers() {
       });
   }
 
-  function updateUser(username, adminUser, adminPass ) { 
+  function updateUserRole(username, newRole, adminUser, adminPass) {
+    let url = `https://ocanales.duckdns.org/api/users/${username}`;
 
-    fetch(`http://localhost:3000/api/users/${username}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': 'Basic ' + btoa(`${adminUser}:${adminPass}`)
+    fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'Basic ' + btoa(`${adminUser}:${adminPass}`),
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ newRole })
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Failed to update role: ${response.status}`);
         }
+        return response.json();
       })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`Failed to update user: ${response.status}`);
-          }
-          return response.json();
-        })
-        .then(data => {
-          alert(data.message);
-          // Refresh the user list
-          fetchUsers();
-        })
-        .catch(err => {
-          console.error('Error:', err);
-          alert('Error updating user.');
-        });
-
+      .then(data => {
+        alert(data.message);
+        // Refresh the user list after update
+        fetchUsers();
+      })
+      .catch(err => {
+        console.error('Error updating user role:', err);
+        alert('Error updating user role.');
+      });
   }
   
   function deleteUser(username, adminUser, adminPass) {
+    let url = `https://ocanales.duckdns.org/api/users/${username}`;
+
     if (!confirm(`Are you sure you want to delete user "${username}"?`)) {
       return;
     }
   
-    fetch(`http://localhost:3000/api/users/${username}`, {
+    fetch(url, {
       method: 'DELETE',
       headers: {
         'Authorization': 'Basic ' + btoa(`${adminUser}:${adminPass}`)

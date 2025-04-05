@@ -71,7 +71,7 @@ const server = http.createServer((req, res) => {
             }
             const newTodo = { id: todos.length + 1, task, completed: false}; // New Task
             todos.push(newTodo);
-            res.writeHead(201, { 'Content-Type': 'application/json' });
+            res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ message: 'Todo added.', todo: newTodo }));
         });
     }
@@ -219,6 +219,58 @@ const server = http.createServer((req, res) => {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ message: `User '${userToDelete}' deleted.` }));
     }
+
+    else if (pathName.startsWith('/api/users/') && req.method === 'PUT') {
+        // 1. Must be authenticated
+        if (!authenticate(req, res)) return;
+        if (!requireRole('admin')(req, res)) return;
+      
+        // Extract the username from the URL
+        const parts = pathName.split('/');
+        const userToUpdate = parts[parts.length - 1]; 
+      
+        let body = '';
+        req.on('data', chunk => {
+          body += chunk;
+        });
+        req.on('end', () => {
+          let { newRole } = {};
+          try {
+            ({ newRole } = JSON.parse(body)); 
+          } catch (err) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Invalid JSON' }));
+            return;
+          }
+      
+          // Basic validation
+          if (!newRole) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'newRole is required.' }));
+            return;
+          }
+      
+          // Find the user in passwordDB
+          const user = passwordDB.users.find(u => u.username === userToUpdate);
+          if (!user) {
+            res.writeHead(404, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'User not found.' }));
+            return;
+          }
+      
+          // 3. Update the role
+          user.role = newRole;
+      
+          // 4. Save to disk
+          fs.writeFileSync(dbPath, JSON.stringify(passwordDB, null, 2));
+      
+          // 5. Return success
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ 
+            message: `User '${userToUpdate}' role updated to '${newRole}'.`
+          }));
+        });
+      }
       
     /// User went to an unknown route 
     else { 
@@ -254,11 +306,11 @@ function authenticate(req, res) {
 
     // Contains invalid credentials 
     if(!user) { 
-        res.writeHead(403, {
+        res.writeHead(401, {
             'WWW-Authenticate': 'Basic realm="Restricted Area"',
             'Content-Type': 'application/json'
           });
-          res.end(JSON.stringify({ error: 'Invalid credentials.' }));
+          res.end(JSON.stringify({ error: 'Invalid credentials or no credentials entered!' }));
           return false;
     }
 
