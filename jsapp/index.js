@@ -8,15 +8,28 @@ const { createHmac, randomUUID} = require('node:crypto');
 const secret = 'abcdefg';
 
 // Load users 
-const dbPath = path.join(__dirname, 'password.db.json');
-let rawData = fs.readFileSync(dbPath, 'utf-8');
-let passwordDB = JSON.parse(rawData);
+// const dbPath = path.join(__dirname, 'password.db.json');
+// let rawData = fs.readFileSync(dbPath, 'utf-8');
+// let passwordDB = JSON.parse(rawData);
 
 const hash = (str) => { 
     return createHmac('sha256', secret).update(str).digest('hex');
 }
 
 let todos = [];
+let passwordDB = []
+
+// Use a file system to load the todos and users on startup
+try { 
+    const todosData = fs.readFileSync(path.join(__dirname, 'todos.db.json'), 'utf-8');
+    const usersData = fs.readFileSync(path.join(__dirname, 'password.db.json'), 'utf-8');
+    todos = JSON.parse(todosData);
+    passwordDB = JSON.parse(usersData);
+} catch (err) {
+    console.error("Error reading todos.db.json or users.db.json:", err);
+    todos = [];
+    passwordDB = [];
+}
 
 // HTTP Server 
 const server = http.createServer((req, res) => { 
@@ -71,6 +84,7 @@ const server = http.createServer((req, res) => {
             }
             const newTodo = { id: todos.length + 1, task, completed: false}; // New Task
             todos.push(newTodo);
+            fs.writeFileSync(path.join(__dirname, 'todos.db.json'), JSON.stringify(todos, null, 2)); // Save to disk
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ message: 'Todo added.', todo: newTodo }));
         });
@@ -104,6 +118,7 @@ const server = http.createServer((req, res) => {
                 if (data.completed !== undefined) { 
                     todo.completed = data.completed
                 }
+                fs.writeFileSync(path.join(__dirname, 'todos.db.json'), JSON.stringify(todos, null, 2));
                 res.writeHead(200, {'Content-Type': 'application/json'});
                 res.end(JSON.stringify({message: "Todo updated"}));
         });
@@ -121,6 +136,7 @@ const server = http.createServer((req, res) => {
         }
 
         todos.splice(index, 1); // remove todo
+        fs.writeFileSync(path.join(__dirname, 'todos.db.json'), JSON.stringify(todos, null, 2));
         res.writeHead(200, { 'Content-Type': 'application/json'});
         res.end(JSON.stringify({message: "Todo deleted"}));
     }

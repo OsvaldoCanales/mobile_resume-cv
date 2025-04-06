@@ -192,6 +192,7 @@ function createUser() {
 function fetchUsers() {
     const adminUser = document.getElementById('admin-username').value;
     const adminPass = document.getElementById('admin-password').value;
+    // const url = `http://localhost:3000/api/users`;
     let url = `https://ocanales.duckdns.org/api/users`;
   
     fetch(url, {
@@ -254,6 +255,7 @@ function fetchUsers() {
   }
 
   function updateUserRole(username, newRole, adminUser, adminPass) {
+    // const url = `http://localhost:3000/api/users/${username}`;
     let url = `https://ocanales.duckdns.org/api/users/${username}`;
 
     fetch(url, {
@@ -282,6 +284,7 @@ function fetchUsers() {
   }
   
   function deleteUser(username, adminUser, adminPass) {
+    // const url = `http://localhost:3000/api/users/${username}`;
     let url = `https://ocanales.duckdns.org/api/users/${username}`;
 
     if (!confirm(`Are you sure you want to delete user "${username}"?`)) {
