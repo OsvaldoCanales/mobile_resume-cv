@@ -7,11 +7,6 @@ const path = require('path');
 const { createHmac, randomUUID} = require('node:crypto');
 const secret = 'abcdefg';
 
-// Load users 
-// const dbPath = path.join(__dirname, 'password.db.json');
-// let rawData = fs.readFileSync(dbPath, 'utf-8');
-// let passwordDB = JSON.parse(rawData);
-
 const hash = (str) => { 
     return createHmac('sha256', secret).update(str).digest('hex');
 }
@@ -49,7 +44,6 @@ const server = http.createServer((req, res) => {
 
     /// Handle GET Request: Fetch To-Do List
     if (pathName === "/api/todos" && req.method === 'GET') { 
-
         let filteredTodos = [...todos];
 
         if (query.completed) { // Checkbox feature
@@ -67,7 +61,6 @@ const server = http.createServer((req, res) => {
     }
     /// Handle POST Request: Add New To-Do
     else if (pathName === "/api/todos" && req.method === 'POST') {
-
         if(!authenticate(req, res)) return;
         let body = '';
         req.on('data', chunk => { 
@@ -82,7 +75,7 @@ const server = http.createServer((req, res) => {
                 res.end(JSON.stringify({error: 'Task is required.'}));
                 return;
             }
-            const newTodo = { id: todos.length + 1, task, completed: false}; // New Task
+            const newTodo = { id: todos.length + 1, task, completed: false, createdBy: req.user.username, createdAt: new Date().toISOString()}; // New Task
             todos.push(newTodo);
             fs.writeFileSync(path.join(__dirname, 'todos.db.json'), JSON.stringify(todos, null, 2)); // Save to disk
             res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -184,7 +177,7 @@ const server = http.createServer((req, res) => {
             role
           };
           passwordDB.users.push(newUser);
-          fs.writeFileSync(dbPath, JSON.stringify(passwordDB, null, 2));
+          fs.writeFileSync(passwordDB, JSON.stringify(passwordDB, null, 2));
       
           // 7. Return success
           res.writeHead(201, { 'Content-Type': 'application/json' });
@@ -230,7 +223,7 @@ const server = http.createServer((req, res) => {
       
         // Remove from the array
         passwordDB.users.splice(index, 1);
-        fs.writeFileSync(dbPath, JSON.stringify(passwordDB, null, 2));
+        fs.writeFileSync(passwordDB, JSON.stringify(passwordDB, null, 2));
       
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ message: `User '${userToDelete}' deleted.` }));
@@ -278,7 +271,7 @@ const server = http.createServer((req, res) => {
           user.role = newRole;
       
           // 4. Save to disk
-          fs.writeFileSync(dbPath, JSON.stringify(passwordDB, null, 2));
+          fs.writeFileSync(passwordDB, JSON.stringify(passwordDB, null, 2));
       
           // 5. Return success
           res.writeHead(200, { 'Content-Type': 'application/json' });

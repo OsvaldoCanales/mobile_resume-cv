@@ -3,63 +3,65 @@
 /// We then send a request to the api route and get a response. 
 /// and we then display the message back.
 function fetchTodos(filter='') { 
-    let todoHeader = document.getElementById("todos-header");
+  let todoHeader = document.getElementById("todos-header");
+  // let url = `http://localhost:3000/api/todos`;
+  let url = `https://ocanales.duckdns.org/api/todos`;
 
-    // let url = `http://localhost:3000/api/todos`;
-    let url = `https://ocanales.duckdns.org/api/todos`;
-
-    if (filter === 'completed') { 
-        todoHeader.innerHTML = 'Completed Todos: ';
-        url += '?completed=true';
-    }
-    else if(filter === 'incomplete') { 
-        todoHeader.innerHTML = 'Incomplete Todos: ';
-        url += '?completed=false';
-    } else {
-        todoHeader.innerHTML = 'All todos: ';
-
-    }
+  if (filter === 'completed') { 
+      todoHeader.innerHTML = 'Completed Todos: ';
+      url += '?completed=true';
+  }
+  else if(filter === 'incomplete') { 
+      todoHeader.innerHTML = 'Incomplete Todos: ';
+      url += '?completed=false';
+  } else {
+      todoHeader.innerHTML = 'All todos: ';
+  }
+  
+  // Define the fetch logic as a function
+  function doFetch() {
     fetch(url) // Get Request
-    .then(response => response.json())
-    .then(data => { 
+      .then(response => response.json())
+      .then(data => { 
         const todosList = document.getElementById("todos");
-
-        // if (!data.todos) { 
-        //     alert(" Error 404: No Completed Tasks. Note: Feature to complete tasks not implemented yet. This is to demonstrate 404 on backend.");
-        //     return;
-        // }
         todosList.innerHTML = '';
         data.todos.forEach(todo => { 
+          const listItem = document.createElement("li");
+          // Editable Button
+          const editButton = document.createElement("button");
+          editButton.textContent = "Edit";
+          editButton.addEventListener("click", () => updateTodo(todo.id, taskSpan));
 
-            const listItem = document.createElement("li");
+          const taskSpan = document.createElement("span");
+          taskSpan.textContent = todo.task;
 
-            // // Add checkbox "To be added"
-            // const checkbox = document.createElement('input');
-            // checkbox.type = "checkbox";
-            // checkbox.checked = todo.completed;
-            // checkbox.addEventListener("change", () => updateTodo(todo.id, null, checkbox.checked));
+          // Created by 
+          const createdBy = document.createElement("span");
+          createdBy.textContent = ` (by ${todo.createdBy || "unknown"})`;
 
-            const taskSpan = document.createElement("span");
-            taskSpan.textContent = todo.task;
+          // Created At 
+          const createdAt = document.createElement("span");
+          createdAt.textContent = ` (Created at ${new Date(todo.createdAt).toLocaleString()})`;
 
-            // Editable Button
-            const editButton = document.createElement("button");
-            editButton.textContent = "Edit";
-            editButton.addEventListener("click", () => updateTodo(todo.id, taskSpan));
+          // Delete Button
+          const deleteButton = document.createElement("button");
+          deleteButton.textContent = "Delete";
+          deleteButton.addEventListener("click", () => deleteTodo(todo.id, listItem));
 
-            // Delete Button
-            const deleteButton = document.createElement("button");
-            deleteButton.textContent = "Delete";
-            deleteButton.addEventListener("click",() => deleteTodo(todo.id, listItem));
-
-            // Append elements
-            listItem.appendChild(editButton);
-            listItem.appendChild(taskSpan);
-            listItem.append(deleteButton);
-            todosList.appendChild(listItem);
-        })
-    })
-    .catch(error => console.error('Error fetching todos:', error));
+          // Append elements
+          listItem.appendChild(editButton);
+          listItem.appendChild(taskSpan);
+          listItem.appendChild(deleteButton);
+          listItem.appendChild(createdBy);
+          listItem.appendChild(createdAt);
+          todosList.appendChild(listItem);
+        });
+      })
+      .catch(error => console.error('Error fetching todos:', error));
+  }
+  doFetch();  
+  // Set up polling to fetch todos every 5 seconds
+  setInterval(doFetch, 5000);
 }
 
 function postTodo() { 
@@ -195,6 +197,7 @@ function fetchUsers() {
     // const url = `http://localhost:3000/api/users`;
     let url = `https://ocanales.duckdns.org/api/users`;
   
+    // function getUsers() {
     fetch(url, {
       method: 'GET',
       headers: {
@@ -252,6 +255,10 @@ function fetchUsers() {
         console.error('Error:', err);
         alert('Failed to fetch users. Are you an admin?');
       });
+    // }
+    // getUsers();  
+    // // Set up polling to fetch users every 5 seconds
+    // setInterval(getUsers, 5000);
   }
 
   function updateUserRole(username, newRole, adminUser, adminPass) {
